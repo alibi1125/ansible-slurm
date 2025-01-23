@@ -4,6 +4,7 @@
   ansible.builtin.package:
     name: "{{ __slurm_packages.slurmctld }}"
     state: "{{ 'latest' if slurm_upgrade else 'present' }}"
+  become: true
 
 - name: Create slurm state directory
   ansible.builtin.file:
@@ -15,6 +16,7 @@
   when: slurm_create_dirs
   notify:
     - Reload slurmctld
+  become: true
 
 - name: Create slurm log directory
   ansible.builtin.file:
@@ -24,6 +26,7 @@
     mode: 0755
     state: directory
   when: slurm_create_dirs and __slurm_config_merged.SlurmctldLogFile != omit
+  become: true
 
 - name: Include config dir creation tasks
   ansible.builtin.include_tasks: _inc_create_config_dir.yml

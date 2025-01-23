@@ -6,6 +6,7 @@
     gid: "{{ (slurm_user | default({})).gid | default(omit) }}"
     system: "{{ (slurm_user | default({})).system | default('yes') }}"
   when: (slurm_user | default({})).group is defined
+  become: true
 
 - name: Create slurm user
   ansible.builtin.user:
@@ -17,3 +18,4 @@
     home: "{{ (slurm_user | default({})).home | default(omit) }}"
     shell: "{{ (slurm_user | default({})).shell | default(omit) }}"
     system: "{{ (slurm_user | default({})).system | default('yes') }}"
+  become: true

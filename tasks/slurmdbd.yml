@@ -4,6 +4,7 @@
   ansible.builtin.package:
     name: "{{ __slurm_packages.slurmdbd }}"
     state: "{{ 'latest' if slurm_upgrade else 'present' }}"
+  become: true
 
 - name: Create slurm log directory
   ansible.builtin.file:
@@ -13,10 +14,12 @@
     mode: 0755
     state: directory
   when: slurm_create_dirs and __slurmdbd_config_merged.LogFile != omit
+  become: true
 
 - name: Include config dir creation tasks
   ansible.builtin.include_tasks: _inc_create_config_dir.yml
   when: slurm_create_dirs
+  become: true
 
 - name: Install slurmdbd.conf
   ansible.builtin.template:
@@ -32,3 +35,4 @@
     label: "{{ item.name }}"
   notify:
     - Reload slurmdbd
+  become: true

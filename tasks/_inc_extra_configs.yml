@@ -22,3 +22,4 @@
   notify:
     - Reload slurmctld
     - Reload slurmd
+  become: true

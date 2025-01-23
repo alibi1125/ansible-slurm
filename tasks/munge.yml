@@ -7,6 +7,7 @@
     group: munge
     mode: 0700
     state: directory
+  become: true
 
 - name: Install munge key
   ansible.builtin.copy:
@@ -18,9 +19,11 @@
   when: slurm_munge_key is defined
   notify:
     - Restart munge
+  become: true
 
 - name: Ensure Munge is enabled and running
   ansible.builtin.service:
     name: munge
     enabled: true
     state: started
+  become: true

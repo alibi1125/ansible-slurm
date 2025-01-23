@@ -4,6 +4,7 @@
   ansible.builtin.package:
     name: "{{ __slurm_packages.client }}"
     state: "{{ 'latest' if slurm_upgrade else 'present' }}"
+  become: true
 
 - name: Include config dir creation tasks
   ansible.builtin.include_tasks: _inc_create_config_dir.yml
@@ -15,6 +16,7 @@
     dest: /etc/logrotate.d/slurm
     mode: 0644
   when: slurm_rotate_logs
+  become: true
 
 - name: Install slurm.conf
   ansible.builtin.template:
@@ -26,6 +28,7 @@
   notify:
     - Restart slurmd
     - Restart slurmctld
+  become: true
 
 - name: Include munge tasks
   ansible.builtin.include_tasks: munge.yml

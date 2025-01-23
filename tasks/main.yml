@@ -16,6 +16,10 @@
   ansible.builtin.include_tasks: slurmdbd.yml
   when: "'slurmdbdservers' in group_names or 'dbd' in slurm_roles"
 
+- name: Include REST API installation tasks
+  ansible.builtin.include_tasks: slurmrestd.yml
+  when: "'slurmrestapiservers' in group_names or 'rest' in slurm_roles"
+
 - name: Import common tasks
   ansible.builtin.import_tasks: common.yml
 

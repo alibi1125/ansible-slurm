@@ -1,0 +1,65 @@
+---
+
+- name: Create slurm REST API group
+  ansible.builtin.group:
+    name: "{{ (slurm_rest_user | default({})).group }}"
+    gid: "{{ (slurm_rest_user | default({})).gid | default(omit) }}"
+    system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
+  when: (slurm_rest_user | default({})).group is defined
+
+- name: Create slurm REST API user
+  ansible.builtin.user:
+    name: "{{ (slurm_rest_user | default({})).name | default('slurmrest') }}"
+    comment: "{{ (slurm_rest_user | default({})).comment | default(omit) }}"
+    uid: "{{ (slurm_rest_user | default({})).uid | default(omit) }}"
+    group: "{{ (slurm_rest_user | default({})).group | default(omit) }}"
+    groups: "{{ (slurm_rest_user | default({})).groups | default(omit) }}"
+    home: "{{ (slurm_rest_user | default({})).home | default(omit) }}"
+    shell: "{{ (slurm_rest_user | default({})).shell | default(omit) }}"
+    system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
+
+- name: Install Slurm REST API interface
+  ansible.builtin.package:
+    name: "{{ __slurm_packages.slurmrestd }}"
+    state: "{{ 'latest' if slurm_upgrade else 'present' }}"
+  become: true
+
+- name: Set REST API user
+  ansible.builtin.lineinfile:
+    path: "/usr/lib/systemd/system/slurmrestd.service"
+    regexp: "^# User="
+    line: "User={{ (slurm_rest_user | default({})).name | default('slurmrest') }}"
+  notify: Reload slurmrestd
+  become: true
+
+- name: Set REST API group
+  ansible.builtin.lineinfile:
+    path: "/usr/lib/systemd/system/slurmrestd.service"
+    regexp: "^# Group="
+    line: "Group={{ (slurm_rest_user | default({})).group | default('slurmrest') }}"
+  notify: Reload slurmrestd
+  become: true
+
+- name: Create statesave directory
+  ansible.builtin.file:
+    path: "/var/spool/slurm/statesave"
+    state: "directory"
+    owner: "{{ (slurm_user | default({})).name | default('slurm') }}"
+    group: "{{ (slurm_user | default({})).group | default('slurm') }}"
+    mode: "0755"
+  become: true
+
+- name: Create cryptographic key for JWT
+  ansible.builtin.command:
+    cmd: "dd if=/dev/random of=/var/spool/slurm/statesave/jwt_hs256.key bs=32 count=1"
+    creates: "/var/spool/slurm/statesave/jwt_hs256.key"
+  become: true
+  notify: Restart slurmrestd
+
+- name: Set reasonable permissions for the key
+  ansible.builtin.file:
+    path: "/var/spool/slurm/statesave/jwt_hs256.key"
+    owner: "{{ (slurm_user | default({})).name | default('slurm') }}"
+    group: "{{ (slurm_user | default({})).group | default('slurm') }}"
+    mode: "0400"
+  become: true
