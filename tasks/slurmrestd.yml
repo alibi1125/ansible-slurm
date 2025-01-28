@@ -6,6 +6,7 @@
     gid: "{{ (slurm_rest_user | default({})).gid | default(omit) }}"
     system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
   when: (slurm_rest_user | default({})).group is defined
+  become: true
 
 - name: Create slurm REST API user
   ansible.builtin.user:
@@ -17,6 +18,7 @@
     home: "{{ (slurm_rest_user | default({})).home | default(omit) }}"
     shell: "{{ (slurm_rest_user | default({})).shell | default(omit) }}"
     system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
+  become: true
 
 - name: Install Slurm REST API interface
   ansible.builtin.package:
@@ -29,7 +31,9 @@
     path: "/usr/lib/systemd/system/slurmrestd.service"
     regexp: "^# User="
     line: "User={{ (slurm_rest_user | default({})).name | default('slurmrest') }}"
-  notify: Reload slurmrestd
+  notify:
+    - Reload slurmrestd
+    - Restart slurmrestd
   become: true
 
 - name: Set REST API group
@@ -37,7 +41,9 @@
     path: "/usr/lib/systemd/system/slurmrestd.service"
     regexp: "^# Group="
     line: "Group={{ (slurm_rest_user | default({})).group | default('slurmrest') }}"
-  notify: Reload slurmrestd
+  notify:
+    - Reload slurmrestd
+    - Restart slurmrestd
   become: true
 
 - name: Create statesave directory
