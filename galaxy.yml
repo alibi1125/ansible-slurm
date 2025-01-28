@@ -1,6 +1,6 @@
 namespace: alibi1125
 name: slurm
-version: 0.1.0
+version: 0.1.1
 readme: README.md
 authors: ["Original by Nate Coraor", "Original by Helena Rasche", "Alexander Birk"]
 description: "Install and configure a Slurm cluster on RHEL and derivatives with extra features"
