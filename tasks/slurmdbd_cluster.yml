@@ -2,16 +2,20 @@
 
 - name: Check for existence of cluster in db.
   register: cluster_check
-  shell: "sacctmgr -n list cluster | cut -f 4 -d ' '"
+  shell: "sacctmgr --parsable2 --noheader list cluster format=cluster"
   become: true
 
-- name: set cluster_check_boolean
+- name: -DEBUG- Print output
+  ansible.builtin.debug:
+    msg: "{{ cluster_check }}"
+
+- name: Set cluster_check_boolean
   set_fact:
     __cluster_not_setup: false
-  when: cluster_check.stdout == __slurm_cluster_name
+  when: __slurm_cluster_name in (cluster_check | split('\n'))
 
 - name: Create the slurmdbd cluster
-  command: sacctmgr -i -n add cluster {{ __slurm_cluster_name }}
+  command: "sacctmgr --immediate add cluster {{ __slurm_cluster_name }}"
   notify:
     - Reload slurmdbd
   when: __cluster_not_setup

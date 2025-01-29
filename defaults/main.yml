@@ -20,7 +20,7 @@ slurmrestd_service_name: slurmrestd
 
 # Cluster name for slurm config. This is required to correctly setup slurmdbd and attune it to the slurm config.
 __slurm_cluster_name: "{{ slurm_cluster | default('cluster') }}"
-__cluster_not_setup: true # Default value. Is modified if cluster already exists.
+__cluster_not_setup: true # Default value. Is modified if cluster already exists in db
 
 slurm_start_services: true
 
@@ -28,8 +28,8 @@ __slurm_user_name: "{{ (slurm_user | default({})).name | default('slurm') }}"
 # TODO: this could be incorrect, use the group collection from galaxyproject.galaxy
 __slurm_group_name: "{{ (slurm_user | default({})).group | default(omit) }}"
 
-__slurm_rest_user_name: "(slurm_rest_user | default({})).name | default('slurmrest')"
-__slurm_rest_group_name: "(slurm_rest_user | default({})).group | default('slurmrest')"
+__slurm_rest_user_name: "{{ (slurm_rest_user | default({})).name | default('slurmrest') }}"
+__slurm_rest_group_name: "{{ (slurm_rest_user | default({})).group | default(omit) }}"
 
 __slurm_run_dir: >-
   {{

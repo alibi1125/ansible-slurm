@@ -5,7 +5,7 @@
     name: "{{ __slurm_rest_group_name }}"
     gid: "{{ (slurm_rest_user | default({})).gid | default(omit) }}"
     system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
-  when: (slurm_rest_user | default({})).group is defined
+  when: __slurm_rest_group_name is defined
   become: true
 
 - name: Create slurm REST API user
