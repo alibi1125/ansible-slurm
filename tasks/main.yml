@@ -45,7 +45,7 @@
   when: "slurm_start_services and ('slurmexechosts' in group_names or 'exec' in slurm_roles)"
 
 - name: Ensure slurmrestd is enabled and running
-  ansible.builtin.services:
+  ansible.builtin.service:
     name: "{{ slurmrestd_service_name }}"
     enabled: true
     state: started

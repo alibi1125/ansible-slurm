@@ -32,11 +32,12 @@
     path: "/usr/lib/systemd/system/slurmrestd.service"
     regexp: "{{ item.regex }}"
     line: "{{ item.replace }}"
+    backrefs: true
   notify:
     - Reload slurmrestd
     - Restart slurmrestd
   become: true
-  loop: __slurm_redhat_restd_systemd_modifiers
+  loop: "{{ __slurm_redhat_restd_systemd_modifiers }}"
   when: __slurm_redhat
 
 - name: Create statesave directory
