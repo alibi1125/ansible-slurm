@@ -28,6 +28,9 @@ __slurm_user_name: "{{ (slurm_user | default({})).name | default('slurm') }}"
 # TODO: this could be incorrect, use the group collection from galaxyproject.galaxy
 __slurm_group_name: "{{ (slurm_user | default({})).group | default(omit) }}"
 
+__slurm_rest_user_name: "(slurm_rest_user | default({})).name | default('slurmrest')"
+__slurm_rest_group_name: "(slurm_rest_user | default({})).group | default('slurmrest')"
+
 __slurm_run_dir: >-
   {{
     ((ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('20', '<')) or 
@@ -95,5 +98,13 @@ __slurm_redhat_packages:
   slurmd: [munge, slurm, slurm-slurmd]
   slurmdbd: [munge, slurm-slurmdbd]
   slurmrestd: [slurm-slurmrestd]
+
+__slurm_redhat_restd_systemd_modifiers:
+  - regex: '^# User='
+    replace: 'User={{ (slurm_rest_user | default({})).name | default("slurmrest") }}'
+  - regex: '^# Group='
+    replace: 'Group={{ (slurm_rest_user | default({})).group | default("slurmrest") }}'
+  - regex: '^(.*)unix:/var/lib/slurmrestd.socket(.*)$'
+    replace: '\1unix:{{ slurm_slurmrestd_sock_path | default("/var/lib/slurmrest") }}/slurmrestd.socket\2'
 
 __slurm_packages: "{{ __slurm_debian_packages if __slurm_debian else __slurm_redhat_packages }}"
