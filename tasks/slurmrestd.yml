@@ -40,6 +40,12 @@
   loop: "{{ __slurm_redhat_restd_systemd_modifiers }}"
   when: __slurm_redhat
 
+- name: Perform a daemon reload just to be safe
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  become: true
+  when: __slurm_redhat
+
 - name: Create statesave directory
   ansible.builtin.file:
     path: "/var/spool/slurm/statesave"
