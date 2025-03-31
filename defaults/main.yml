@@ -19,10 +19,14 @@ slurmdbd_service_name: slurmdbd
 slurmrestd_service_name: slurmrestd
 
 # Cluster name for slurm config. This is required to correctly setup slurmdbd and attune it to the slurm config.
+# For the role to work as expected, do not set slurm_config.ClusterName manually. Only set slurm_cluster instead.
 __slurm_cluster_name: "{{ slurm_cluster | default('cluster') }}"
 __cluster_not_setup: true # Default value. Is modified if cluster already exists in db
 
 slurm_start_services: true
+# Some actions trigger daemon restarts to apply changed settings. Depending on the specifics, this may be unnecessary
+# and/or undesirable. Set this option true to do reloads instead of restarts where this is an option.
+slurm_no_restarts: false
 
 __slurm_user_name: "{{ (slurm_user | default({})).name | default('slurm') }}"
 # TODO: this could be incorrect, use the group collection from galaxyproject.galaxy

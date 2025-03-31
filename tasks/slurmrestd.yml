@@ -5,7 +5,7 @@
     name: "{{ __slurm_rest_group_name }}"
     gid: "{{ (slurm_rest_user | default({})).gid | default(omit) }}"
     system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
-  when: __slurm_rest_group_name is defined
+  when: __slurm_rest_group_name is defined and __slurm_rest_group_name
   become: true
 
 - name: Create slurm REST API user
@@ -34,7 +34,6 @@
     line: "{{ item.replace }}"
     backrefs: true
   notify:
-    - Reload slurmrestd
     - Restart slurmrestd
   become: true
   loop: "{{ __slurm_redhat_restd_systemd_modifiers }}"
@@ -69,7 +68,8 @@
     cmd: "dd if=/dev/random of=/var/spool/slurm/statesave/jwt_hs256.key bs=32 count=1"
     creates: "/var/spool/slurm/statesave/jwt_hs256.key"
   become: true
-  notify: Restart slurmrestd
+  notify:
+    - Restart slurmrestd
 
 - name: Set reasonable permissions for the key
   ansible.builtin.file:
