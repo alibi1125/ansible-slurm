@@ -20,7 +20,7 @@
     system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
   become: true
 
-- name: Install Slurm REST API interface
+- name: Install slurm REST API interface
   ansible.builtin.package:
     name: "{{ __slurm_packages.slurmrestd }}"
     state: "{{ 'latest' if slurm_upgrade else 'present' }}"
