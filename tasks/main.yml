@@ -2,7 +2,15 @@
 
 - name: Include user creation tasks
   ansible.builtin.include_tasks: user.yml
+  vars:
+    _userconf: slurm_user
   when: slurm_create_user
+
+- name: Include REST user creation tasks
+  ansible.builtin.include_tasks: user.yml
+  vars:
+    _userconf: slurm_rest_user
+  when: "slurm_create_user and ('slurmrestapiservers' in group_names or 'rest' in slurm_roles)"
 
 - name: Include controller installation tasks
   ansible.builtin.include_tasks: slurmctld.yml

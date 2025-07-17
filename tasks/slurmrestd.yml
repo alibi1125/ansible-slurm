@@ -1,25 +1,5 @@
 ---
 
-- name: Create slurm REST API group
-  ansible.builtin.group:
-    name: "{{ __slurm_rest_group_name }}"
-    gid: "{{ (slurm_rest_user | default({})).gid | default(omit) }}"
-    system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
-  when: __slurm_rest_group_name is defined and __slurm_rest_group_name
-  become: true
-
-- name: Create slurm REST API user
-  ansible.builtin.user:
-    name: "{{ __slurm_rest_user_name }}"
-    comment: "{{ (slurm_rest_user | default({})).comment | default(omit) }}"
-    uid: "{{ (slurm_rest_user | default({})).uid | default(omit) }}"
-    group: "{{ __slurm_rest_group_name }}"
-    groups: "{{ (slurm_rest_user | default({})).groups | default(omit) }}"
-    home: "{{ (slurm_rest_user | default({})).home | default(omit) }}"
-    shell: "{{ (slurm_rest_user | default({})).shell | default(omit) }}"
-    system: "{{ (slurm_rest_user | default({})).system | default('yes') }}"
-  become: true
-
 - name: Install slurm REST API interface
   ansible.builtin.package:
     name: "{{ __slurm_packages.slurmrestd }}"
