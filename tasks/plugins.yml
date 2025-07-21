@@ -3,7 +3,7 @@
 - name: Pull in additional installable packages for {{ plugin.name }}
   ansible.builtin.set_fact:
     __slurm_packages:
-      client: "{{ __slurm_packages.client + plugin.pkgs if ('client' in plugin.targets else [] }}"
+      client: "{{ __slurm_packages.client + plugin.pkgs if 'client' in plugin.targets else [] }}"
       slurmctld: "{{ __slurm_packages.slurmctld + plugin.pkgs if ('controller' in plugin.targets and slurm_is_controller) else [] }}"
       slurmd: "{{ __slurm_packages.slurmd + plugin.pkgs if ('exec' in plugin.targets and slurm_is_exechost) else [] }}"
       slurmdbd: "{{ __slurm_packages.slurmdbd + plugin.pkgs if ('dbd' in plugin.targets and slurm_is_dbdserver) else [] }}"
