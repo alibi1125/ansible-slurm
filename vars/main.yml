@@ -1,0 +1,6 @@
+---
+
+slurm_is_controller: "{{ 'slurmservers' in group_names or 'controller' in slurm_roles }}"
+slurm_is_exechost:  "{{ 'slurmexechosts' in group_names or 'exec' in slurm_roles }}"
+slurm_is_dbdserver: "{{ 'slurmdbdservers' in group_names or 'dbd' in slurm_roles }}"
+slurm_is_restserver: "{{ 'slurmrestapiservers' in group_names or 'rest' in slurm_roles }}"

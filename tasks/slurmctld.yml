@@ -11,11 +11,11 @@
     path: "{{ __slurm_config_merged.StateSaveLocation }}"
     owner: "{{ __slurm_user_name }}"
     group: "{{ __slurm_group_name }}"
-    mode: 0700
+    mode: "0700"
     state: directory
   when: slurm_create_dirs
   notify:
-    - Reload slurmctld
+    - Restart slurmctld
   become: true
 
 - name: Create slurm log directory
@@ -23,7 +23,7 @@
     path: "{{ __slurm_config_merged.SlurmctldLogFile | dirname }}"
     owner: "{{ __slurm_user_name }}"
     group: "{{ __slurm_group_name }}"
-    mode: 0755
+    mode: "0755"
     state: directory
   when: slurm_create_dirs and __slurm_config_merged.SlurmctldLogFile != omit
   become: true

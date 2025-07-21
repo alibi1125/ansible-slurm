@@ -1,62 +1,35 @@
 ---
+
 - name: Restart munge
   ansible.builtin.service:
     name: munge
     state: restarted
   become: true
 
-- name: Reload slurmdbd
-  ansible.builtin.service:
-    name: "{{ slurmdbd_service_name }}"
-    state: reloaded
-  when: "slurm_start_services and ('slurmdbdservers' in group_names or 'dbd' in slurm_roles)"
-  become: true
-
 - name: Restart slurmdbd
   ansible.builtin.service:
-    name: "{{ slurmdbd_service_name }}"
+    name: "{{ slurm_slurmdbd_service_name }}"
     state: "{{ 'reloaded' if slurm_no_restarts else 'restarted' }}"
-  when: "slurm_start_services and ('slurmdbdservers' in group_names or 'dbd' in slurm_roles)"
-  become: true
-
-- name: Reload slurmctld
-  ansible.builtin.service:
-    name: "{{ slurmctld_service_name }}"
-    state: reloaded
-  when: "slurm_start_services and ('slurmservers' in group_names or 'controller' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_dbdserver"
   become: true
 
 - name: Restart slurmctld
   ansible.builtin.service:
-    name: "{{ slurmctld_service_name }}"
+    name: "{{ slurm_slurmctld_service_name }}"
     state: "{{ 'reloaded' if slurm_no_restarts else 'restarted' }}"
-  when: "slurm_start_services and ('slurmservers' in group_names or 'controller' in slurm_roles)"
-  become: true
-
-- name: Reload slurmd
-  ansible.builtin.service:
-    name: "{{ slurmd_service_name }}"
-    state: reloaded
-  when: "slurm_start_services and ('slurmexechosts' in group_names or 'exec' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_controller"
   become: true
 
 - name: Restart slurmd
   ansible.builtin.service:
-    name: "{{ slurmd_service_name }}"
+    name: "{{ slurm_slurmd_service_name }}"
     state: "{{ 'reloaded' if slurm_no_restarts else 'restarted' }}"
-  when: "slurm_start_services and ('slurmexechosts' in group_names or 'exec' in slurm_roles)"
-  become: true
-
-- name: Reload slurmrestd
-  ansible.builtin.service:
-    name: "{{ slurmrestd_service_name }}"
-    state: reloaded
-  when: "slurm_start_services and ('slurmrestapiservers' in group_names or 'rest' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_exechost"
   become: true
 
 - name: Restart slurmrestd
   ansible.builtin.service:
-    name: "{{ slurmrestd_service_name }}"
+    name: "{{ slurm_slurmrestd_service_name }}"
     state: "{{ 'reloaded' if slurm_no_restarts else 'restarted' }}"
-  when: "slurm_start_services and ('slurmrestapiservers' in group_names or 'rest' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_restserver"
   become: true

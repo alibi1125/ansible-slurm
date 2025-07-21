@@ -10,55 +10,62 @@
   ansible.builtin.include_tasks: user.yml
   vars:
     _userconf: slurm_rest_user
-  when: "slurm_create_user and ('slurmrestapiservers' in group_names or 'rest' in slurm_roles)"
+  when: "slurm_create_user and slurm_is_restserver"
+
+- name: Pull in plugin installs and configs
+  ansible.builtin.include_tasks: plugins.yml
+  loop: "{{ slurm_plugins }}"
+  loop_control:
+    loop_var: plugin
+    label: plugin.name
 
 - name: Include controller installation tasks
   ansible.builtin.include_tasks: slurmctld.yml
-  when: "'slurmservers' in group_names or 'controller' in slurm_roles"
+  when: slurm_is_controller
 
 - name: Include execution host installation tasks
   ansible.builtin.include_tasks: slurmd.yml
-  when: "'slurmexechosts' in group_names or 'exec' in slurm_roles"
+  when: slurm_is_exechost
 
 - name: Include DB installation tasks
   ansible.builtin.include_tasks: slurmdbd.yml
-  when: "'slurmdbdservers' in group_names or 'dbd' in slurm_roles"
+  when: slurm_is_dbdserver
 
 - name: Include REST API installation tasks
   ansible.builtin.include_tasks: slurmrestd.yml
-  when: "'slurmrestapiservers' in group_names or 'rest' in slurm_roles"
+  when: slurm_is_restserver
 
 - name: Import common tasks
   ansible.builtin.import_tasks: common.yml
 
 - name: Ensure slurmdbd is enabled and running
   ansible.builtin.service:
-    name: "{{ slurmdbd_service_name }}"
+    name: "{{ slurm_slurmdbd_service_name }}"
     enabled: true
     state: started
-  when: "slurm_start_services and ('slurmdbdservers' in group_names or 'dbd' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_dbdserver"
 
 - name: Ensure slurmctld is enabled and running
   ansible.builtin.service:
-    name: "{{ slurmctld_service_name }}"
+    name: "{{ slurm_slurmctld_service_name }}"
     enabled: true
     state: started
-  when: "slurm_start_services and ('slurmservers' in group_names or 'controller' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_controller"
 
 - name: Ensure slurmd is enabled and running
   ansible.builtin.service:
-    name: "{{ slurmd_service_name }}"
+    name: "{{ slurm_slurmd_service_name }}"
     enabled: true
     state: started
-  when: "slurm_start_services and ('slurmexechosts' in group_names or 'exec' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_exechost"
 
 - name: Ensure slurmrestd is enabled and running
   ansible.builtin.service:
-    name: "{{ slurmrestd_service_name }}"
+    name: "{{ slurm_slurmrestd_service_name }}"
     enabled: true
     state: started
-  when: "slurm_start_services and ('slurmrestapihosts' in group_names or 'rest' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_restserver"
 
 - name: Setup cluster on slurmdb
   include_tasks: slurmdbd_cluster.yml
-  when: "slurm_start_services and ('slurmdbdservers' in group_names or 'dbd' in slurm_roles)"
+  when: "slurm_start_services and slurm_is_dbdserver"

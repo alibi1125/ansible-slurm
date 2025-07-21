@@ -4,7 +4,7 @@
   ansible.builtin.template:
     src: "{{ item.template }}"
     dest: "{{ slurm_config_dir }}/{{ item.name }}"
-    mode: 0644
+    mode: "0644"
     backup: true
   loop:
     - name: acct_gather.conf
@@ -20,6 +20,18 @@
     label: "{{ item.name }}"
   when: item.config in vars
   notify:
-    - Reload slurmctld
-    - Reload slurmd
+    - Restart slurmctld
+    - Restart slurmd
   become: true
+
+- name: Install extra plugin configs
+  ansible.builtin.template:
+    src: "{{ plugin.template if plugin.template is defined else 'plugin.conf.j2' }}"
+    dest: "{{ slurm_config_dir }}/{{ plugin.plugin_conf_name }}"
+    mode: "0644"
+    backup: true
+  loop: "{{ slurm_plugins }}"
+  loop_control:
+    loop_var: plugin
+    label: "{{ plugin.name }}"
+  when: "plugin.plugin_conf_name is defined"

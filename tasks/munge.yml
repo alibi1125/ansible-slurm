@@ -5,7 +5,7 @@
     path: /etc/munge
     owner: munge
     group: munge
-    mode: 0700
+    mode: "0700"
     state: directory
   become: true
 
@@ -15,7 +15,7 @@
     dest: /etc/munge/munge.key
     owner: munge
     group: munge
-    mode: 0400
+    mode: "0400"
   when: slurm_munge_key is defined
   notify:
     - Restart munge
