@@ -12,12 +12,20 @@
     _userconf: slurm_rest_user
   when: "slurm_create_user and slurm_is_restserver"
 
+- name: Print all slurm config options before pulling plugins
+  ansible.builtin.debug:
+    var: __slurm_config_merged
+
 - name: Pull in plugin installs and configs
   ansible.builtin.include_tasks: plugins.yml
   loop: "{{ slurm_plugins }}"
   loop_control:
     loop_var: plugin
     label: plugin.name
+
+- name: Print all slurm config options after pulling plugins
+  ansible.builtin.debug:
+    var: __slurm_config_merged
 
 - name: Include controller installation tasks
   ansible.builtin.include_tasks: slurmctld.yml
