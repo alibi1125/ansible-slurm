@@ -3,11 +3,11 @@
 - name: Pull in additional installable packages for {{ plugin.name }}
   ansible.builtin.set_fact:
     __slurm_packages:
-      client: "{{ __slurm_packages.client + plugin.pkgs if 'client' in plugin.targets else [] }}"
-      slurmctld: "{{ __slurm_packages.slurmctld + plugin.pkgs if ('controller' in plugin.targets and slurm_is_controller) else [] }}"
-      slurmd: "{{ __slurm_packages.slurmd + plugin.pkgs if ('exec' in plugin.targets and slurm_is_exechost) else [] }}"
-      slurmdbd: "{{ __slurm_packages.slurmdbd + plugin.pkgs if ('dbd' in plugin.targets and slurm_is_dbdserver) else [] }}"
-      slurmrestd: "{{ __slurm_packages.slurmrestd + plugin.pkgs if ('rest' in plugin.targets and slurm_is_restserver) else [] }}"
+      client: "{{ __slurm_packages.client + (plugin.pkgs if 'client' in plugin.targets else []) }}"
+      slurmctld: "{{ __slurm_packages.slurmctld + (plugin.pkgs if ('controller' in plugin.targets and slurm_is_controller) else []) }}"
+      slurmd: "{{ __slurm_packages.slurmd + (plugin.pkgs if ('exec' in plugin.targets and slurm_is_exechost) else []) }}"
+      slurmdbd: "{{ __slurm_packages.slurmdbd + (plugin.pkgs if ('dbd' in plugin.targets and slurm_is_dbdserver) else []) }}"
+      slurmrestd: "{{ __slurm_packages.slurmrestd + (plugin.pkgs if ('rest' in plugin.targets and slurm_is_restserver) else []) }}"
   when: "plugin.pkgs is defined and plugin.pkgs is iterable and plugin.pkgs is not mapping and plugin.pkgs is not string"
 
 - name: Pull in additional main config entries for {{ plugin.name }}
