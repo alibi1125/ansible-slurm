@@ -3,6 +3,21 @@ Slurm
 
 Install and configure a Slurm cluster on RHEL/CentOS or Debian/Ubuntu servers
 
+Why this fork?
+--------------
+
+The upstream version of this Slurm role, while very useful, contained some bugs and missed some features we
+needed/wanted for our Slurm cluster. Aside from fixes, the main expansions compared to upstream are as follows:
+
+- Fixed handling of non-default cluster names in the Slurm database
+- Made `become` explicit throughout the role where it is truly needed as I prefer it to be as local as possible. Note,
+  however, that you still need to be able to `become`.
+- Can now install slurmrestd as an additional component
+- Supports additional plugin installs such as `job_container/tmpfs`
+
+Note that there may also be downsides compared to upstream, e.g. I didn't test these changes against Debian-based
+distros (yet). In fact, I'm only reasonably sure they work on AlmaLinux 9 targets as that is what we use.
+
 Role Variables
 --------------
 
@@ -15,6 +30,7 @@ For the various roles a slurm node can play, you can either set group names, or 
 - group slurmservers or `slurm_roles: ['controller']`
 - group slurmexechosts or `slurm_roles: ['exec']`
 - group slurmdbdservers or `slurm_roles: ['dbd']`
+- group slurmrestapiservers or `slurm_roles: ['rest']`
 
 General config options for slurm.conf go in `slurm_config`, a hash. Keys are Slurm config option names.
 
@@ -27,12 +43,31 @@ Options for the additional configuration files [acct_gather.conf](https://slurm.
 may be specified in the `slurm_acct_gather_config`, `slurm_cgroup_config` (both of them hashes) and
 `slurm_gres_config` (list of hashes) respectively.
 
+Additional plugins to be installed go in `slurm_plugins`, lists of hashes. Required keys are
+
+- `name`, the name of the plugin.
+- `pkgs`, a list containing the names of the plugin's required packages, to be installed via the system's package
+  manager. Make sure your package manager will be able to find them, i.e. provide additional repos beforehand if
+  necessary. Leave empty for built-in plugins or if the install is handled by other means.
+- `targets`, a list containing the node classes the plugin should be installed on. Use the same role specifiers as in
+  `slurm_roles`, i.e. `controller`, `exec`, `dbd` or `rest`.
+
+Optional keys for each plugin are
+
+- `slurm_conf_entries`, a hash containing additional (!), plugin-related key (option) value pairs for `slurm.conf`,
+  following the same structure as `slurm_config`. Note that these options are merged into `slurm_config` before
+  templating and on all nodes, independent of selected `targets`.
+- `plugin_conf_name`, name of an additional config file for the plugin. Placed in slurm's config directory (alongside
+  `slurm.conf`).
+- `plugin_conf_template`, template for the additional config file. Defaults to `plugin.conf.j2` if not provided. The
+  default works for config files of the same structure as `slurm.conf`. Note: Ignored completely if `plugin_conf_name`
+  isn't also provided.
+- `plugin_conf_entries`, a hash containing key value pairs for the plugin's additional config file. Note: Ignored
+  completely if `plugin_conf_name` isn't also provided.
+
 Set `slurm_upgrade` to true to upgrade the installed Slurm packages.
 
 You can use `slurm_user` (a hash) and `slurm_create_user` (a bool) to pre-create a Slurm user so that uids match.
-
-Note that this role requires root access, so enable ``become`` either globally in your playbook / on the commandline or
-just for the role like [shown below](#example-playbooks).
 
 Dependencies
 ------------
@@ -134,7 +169,13 @@ MIT
 Author Information
 ------------------
 
+Original Authors:
+
 - [Nate Coraor](https://github.com/natefoo)
 - [Helena Rasche](https://github.com/erasche)
 
 [View contributors on GitHub](https://github.com/galaxyproject/ansible-slurm/graphs/contributors)
+
+This fork:
+
+- [Alexander Birk](https://github.com/alibi1125)
