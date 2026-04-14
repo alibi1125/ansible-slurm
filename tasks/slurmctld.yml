@@ -4,6 +4,7 @@
   ansible.builtin.package:
     name: "{{ __slurm_packages.slurmctld }}"
     state: "{{ 'latest' if slurm_upgrade else 'present' }}"
+    disable_gpg_check: "{{ true if slurm_use_local_packages else omit }}"
   become: true
 
 - name: Create slurm state directory

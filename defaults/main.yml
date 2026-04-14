@@ -47,13 +47,13 @@ __slurm_rest_group_name: "{{ (slurm_rest_user | default({})).group | default(omi
 
 __slurm_run_dir: >-
   {{
-    ((ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('20', '<')) or 
+    ((ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('20', '<')) or
      (ansible_distribution == 'Debian' and ansible_distribution_major_version is version('10', '<')))
     | ternary('/var/run/slurm-llnl', '/run')
   }}
 __slurm_llnl: >-
   {{
-    (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('22', '<')) or 
+    (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('22', '<')) or
     (ansible_distribution == 'Debian' and ansible_distribution_major_version is version('11', '<'))
   }}
 __slurm_log_dir: "{{ __slurm_llnl | ternary('/var/log/slurm-llnl', '/var/log/slurm') }}"
@@ -108,7 +108,7 @@ __slurm_debian_packages:
   slurmrestd: [slurmrestd]
 
 __slurm_redhat_packages:
-  client: [slurm, munge]
+  client: [munge, slurm]
   slurmctld: [munge, slurm, slurm-slurmctld]
   slurmd: [munge, slurm, slurm-slurmd]
   slurmdbd: [munge, slurm-slurmdbd]
