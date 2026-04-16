@@ -18,7 +18,7 @@
       template: gres.conf.j2
   loop_control:
     label: "{{ item.name }}"
-  when: item.config in vars
+  when: lookup('vars', item.config) is defined
   notify:
     - Restart slurmctld
     - Restart slurmd

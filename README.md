@@ -14,6 +14,7 @@ needed/wanted for our Slurm cluster. Aside from fixes, the main expansions compa
   however, that you still need to be able to `become`.
 - Can now install slurmrestd as an additional component
 - Supports additional plugin installs such as `job_container/tmpfs`
+- Supports installing from locally available RPMs (no .deb package support atm, but should be easy to add).
 
 Note that there may also be downsides compared to upstream, e.g. I didn't test these changes against Debian-based
 distros (yet). In fact, I'm only reasonably sure they work on AlmaLinux 9 targets as that is what we use.
@@ -69,6 +70,13 @@ Set `slurm_upgrade` to true to upgrade the installed Slurm packages.
 
 You can use `slurm_user` (a hash) and `slurm_create_user` (a bool) to pre-create a Slurm user so that uids match.
 
+Use `slurm_packages` (a hash) ans `slurm_use_local_packages` (a bool) to control whether to install from locally
+available packages. This functionality was implemented as we decided to move to a more recent Slurm version compared
+to what official repos provide.
+
+Building (or otherwise distributing) the local packages is beyond the scope of this role, so they need to be made
+available before running this role.
+
 Dependencies
 ------------
 
@@ -85,7 +93,7 @@ Minimal setup, all services on one node:
   vars:
     slurm_roles: ['controller', 'exec', 'dbd']
   roles:
-    - role: galaxyproject.slurm
+    - role: alibi1125.slurm
       become: True
 ```
 
@@ -95,7 +103,7 @@ More extensive example:
 - name: Slurm execution hosts
   hosts: all
   roles:
-    - role: galaxyproject.slurm
+    - role: alibi1125.slurm
       become: True
   vars:
     slurm_cgroup_config:
@@ -159,6 +167,54 @@ More extensive example:
       name: slurm
       shell: "/usr/sbin/nologin"
       uid: 888
+```
+
+Example setup making use of additional features this fork provides:
+
+```yml
+- name: Slurm execution hosts
+  hosts: all
+  roles:
+    - role: alibi1125.slurm
+  vars:
+    slurm_cgroup_config: {<omitted>}
+    slurm_config: {<omitted>}
+    slurm_gres_config: [<omitted>]
+    slurm_nodes: [<omitted>]
+    slurm_partitions: [<omitted>]
+    slurm_rest_user:
+      name: slurmrest
+      group: slurmrest
+      comment: The Slurmrestd User
+    slurm_packages:
+      client:
+        - munge
+        - /root/pkgs/slurm-24.11.7-1.el9.x86_64.rpm
+      slurmctld:
+        - munge
+        - /root/pkgs/slurm-24.11.7-1.el9.x86_64.rpm
+        - /root/pkgs/slurm-slurmctld-24.11.7-1.el9.x86_64.rpm
+      slurmd:
+        - munge
+        - /root/pkgs/slurm-24.11.7-1.el9.x86_64.rpm
+        - /root/pkgs/slurm-slurmd-24.11.7-1.el9.x86_64.rpm
+      slurmdbd:
+        - munge
+        - /root/pkgs/slurm-slurmdbd-24.11.7-1.el9.x86_64.rpm
+      slurmrestd:
+        - /root/pkgs/slurm-slurmrestd-24.11.7-1.el9.x86_64.rpm
+    slurm_use_local_packages: true
+    slurm_plugins:
+      - name: slurm-mail  # Name identifier for the plugin
+        pkgs: ['slurm-mail']  # List of packages to be installed through system package manager
+        targets: ['controller']  # List of group tags to run the plugin install on
+        slurm_conf_entries: {'MailProg': '/usr/bin/slurm-spool-mail'}  # Additional slurm.conf options for the plugin
+      - name: job_container/tmpfs
+        pkgs: []  # This plugin comes with the default distribution, no additional installs necessary
+        targets: ['exec']
+        slurm_conf_entries: {'JobContainerType': 'job_container/tmpfs', 'PrologFlags': 'Contain'}
+        plugin_conf_name: job_container.conf  # Plugin`s additional config file in Slurm config directory (Only created if name is specified)
+        plugin_conf_entries: {'BasePath': '/mnt/local/tmps', 'AutoBasePath': 'true'}  # Options for the plugin`s separate config file
 ```
 
 License

@@ -53,18 +53,18 @@ __slurm_rest_listen_on: "{{ (__slurm_rest_listen_sockets | map('regex_replace', 
 
 __slurm_run_dir: >-
   {{
-    ((ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('20', '<')) or
-     (ansible_distribution == 'Debian' and ansible_distribution_major_version is version('10', '<')))
+    ((ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_major_version'] is version('20', '<')) or
+     (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] is version('10', '<')))
     | ternary('/var/run/slurm-llnl', '/run')
   }}
 __slurm_llnl: >-
   {{
-    (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version is version('22', '<')) or
-    (ansible_distribution == 'Debian' and ansible_distribution_major_version is version('11', '<'))
+    (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_major_version'] is version('22', '<')) or
+    (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] is version('11', '<'))
   }}
 __slurm_log_dir: "{{ __slurm_llnl | ternary('/var/log/slurm-llnl', '/var/log/slurm') }}"
-__slurm_debian: "{{ ansible_os_family == 'Debian' }}"
-__slurm_redhat: "{{ ansible_os_family == 'RedHat' }}"
+__slurm_debian: "{{ ansible_facts['os_family'] == 'Debian' }}"
+__slurm_redhat: "{{ ansible_facts['os_family'] == 'RedHat' }}"
 
 __slurm_config_default:
   AuthType: auth/munge
