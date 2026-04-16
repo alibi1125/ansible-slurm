@@ -46,10 +46,10 @@ __slurm_rest_user_name: "{{ (slurm_rest_user | default({})).name | default('slur
 __slurm_rest_group_name: "{{ (slurm_rest_user | default({})).group | default(omit) }}"
 
 # Unix sockets for slurmrestd to listen on can be provided as a list in slurm_rest_listen_sockets. Sockets will be created if necessary.
-__slurm_rest_listen_sockets: "{{ slurm_rest_listen_sockets | default(['/var/lib/slurmrest']) }}"
+__slurm_rest_listen_sockets: "{{ slurm_rest_listen_sockets | default(['/var/lib/slurmrest/slurmrestd.socket']) }}"
 # hosts and ports for slurmrestd to listen on can be provided as a list in slurm_rest_listen_hosts.
 __slurm_rest_listen_hosts: "{{ slurm_rest_listen_hosts | default(['0.0.0.0:6820']) }}"
-__slurm_rest_listen_on: "{{ (__slurm_rest_listen_sockets | map('regex_replace', '(.*)', 'unix:\\1') + __slurm_rest_listen_hosts) | join(',') }}"
+__slurm_rest_listen_on: "{{ (__slurm_rest_listen_sockets | map('regex_replace', '^(.*)$', 'unix:\\1/slurmrestd.socket') + __slurm_rest_listen_hosts) | join(',') }}"
 
 __slurm_run_dir: >-
   {{
@@ -122,9 +122,9 @@ __slurm_redhat_packages:
 
 __slurm_rest_redhat_systemd_modifiers:
   - regex: 'User='
-    replace: 'User={{ slurm_rest_user_name }}'
+    replace: 'User={{ __slurm_rest_user_name }}'
   - regex: 'Group='
-    replace: 'Group={{ slurm_rest_group_name | default(slurm_rest_user_name) }}'
+    replace: 'Group={{ __slurm_rest_group_name | default(__slurm_rest_user_name) }}'
   - regex: 'Environment=SLURMRESTD_LISTEN='
     replace: 'Environment=SLURMRESTD_LISTEN={{ __slurm_rest_listen_on }}'
 

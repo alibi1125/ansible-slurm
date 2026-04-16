@@ -37,7 +37,7 @@
 
 - name: Create unix socket locations
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ item | dirname }}"
     state: directory
     owner: "{{ __slurm_rest_user_name }}"
     group: "{{ __slurm_rest_group_name }}"
