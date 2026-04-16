@@ -10,14 +10,14 @@
 # TODO: Verify if this would work on Debian/Ubuntu as well
 - name: Set up systemd service file
   ansible.builtin.lineinfile:
-    path: "/usr/lib/systemd/system/slurmrestd.service"
+    path: /usr/lib/systemd/system/slurmrestd.service
     regexp: "{{ item.regex }}"
     line: "{{ item.replace }}"
-    backrefs: true
+    insertbefore: "[Install]"
   notify:
     - Restart slurmrestd
   become: true
-  loop: "{{ __slurm_redhat_restd_systemd_modifiers }}"
+  loop: "{{ __slurm_rest_redhat_systemd_modifiers }}"
   when: __slurm_redhat
 
 - name: Perform a daemon reload just to be safe
@@ -28,21 +28,22 @@
 
 - name: Create statesave directory
   ansible.builtin.file:
-    path: "/var/spool/slurm/statesave"
-    state: "directory"
+    path: /var/spool/slurm/statesave
+    state: directory
     owner: "{{ __slurm_user_name }}"
     group: "{{ __slurm_group_name }}"
     mode: "0755"
   become: true
 
-- name: Create unix socket location
+- name: Create unix socket locations
   ansible.builtin.file:
-    path: "{{ slurm_slurmrestd_sock_path | default('/var/lib/slurmrest') }}"
-    state: "directory"
+    path: "{{ item }}"
+    state: directory
     owner: "{{ __slurm_rest_user_name }}"
     group: "{{ __slurm_rest_group_name }}"
     mode: "0755"
   become: true
+  loop: "{{ __slurm_rest_listen_sockets }}"
 
 - name: Create cryptographic key for JWT
   ansible.builtin.command:
