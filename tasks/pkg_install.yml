@@ -6,10 +6,10 @@
       {{
         (
           __slurm_packages.client
-          + __slurm_packages.slurmctld if slurm_is_controller else []
-          + __slurm_packages.slurmd if slurm_is_exechost else []
-          + __slurm_packages.slurmdbd if slurm_is_dbdserver else []
-          + __slurm_packages.slurmrestd if slurm_is_restserver else []
+          + (__slurm_packages.slurmctld if slurm_is_controller else [])
+          + (__slurm_packages.slurmd if slurm_is_exechost else [])
+          + (__slurm_packages.slurmdbd if slurm_is_dbdserver else [])
+          + (__slurm_packages.slurmrestd if slurm_is_restserver else [])
         )
         | unique
       }}

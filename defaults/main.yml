@@ -49,7 +49,7 @@ __slurm_rest_group_name: "{{ (slurm_rest_user | default({})).group | default(omi
 __slurm_rest_listen_sockets: "{{ slurm_rest_listen_sockets | default(['/var/lib/slurmrest/slurmrestd.socket']) }}"
 # hosts and ports for slurmrestd to listen on can be provided as a list in slurm_rest_listen_hosts.
 __slurm_rest_listen_hosts: "{{ slurm_rest_listen_hosts | default(['0.0.0.0:6820']) }}"
-__slurm_rest_listen_on: "{{ (__slurm_rest_listen_sockets | map('regex_replace', '^(.*)$', 'unix:\\1/slurmrestd.socket') + __slurm_rest_listen_hosts) | join(',') }}"
+__slurm_rest_listen_on: "{{ ( __slurm_rest_listen_sockets | map('regex_replace', '^(.*)$', 'unix:\\1') + __slurm_rest_listen_hosts ) | join(',') }}"
 
 __slurm_run_dir: >-
   {{
