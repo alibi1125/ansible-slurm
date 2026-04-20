@@ -1,12 +1,5 @@
 ---
 
-- name: Install Slurm execution host packages
-  ansible.builtin.package:
-    name: "{{ __slurm_packages.slurmd }}"
-    state: "{{ 'latest' if slurm_upgrade else 'present' }}"
-    disable_gpg_check: "{{ true if slurm_use_local_packages else omit }}"
-  become: true
-
 - name: Create slurm spool directory
   ansible.builtin.file:
     path: "{{ __slurm_config_merged.SlurmdSpoolDir }}"

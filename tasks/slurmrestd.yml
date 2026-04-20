@@ -1,12 +1,5 @@
 ---
 
-- name: Install slurm REST API interface
-  ansible.builtin.package:
-    name: "{{ __slurm_packages.slurmrestd }}"
-    state: "{{ 'latest' if slurm_upgrade else 'present' }}"
-    disable_gpg_check: "{{ true if slurm_use_local_packages else omit }}"
-  become: true
-
 # TODO: Verify if this would work on Debian/Ubuntu as well
 - name: Set up systemd service file
   ansible.builtin.lineinfile:

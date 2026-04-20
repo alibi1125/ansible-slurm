@@ -19,6 +19,9 @@
     loop_var: plugin
     label: "{{ plugin.name }}"
 
+- name: Run package installs
+  ansible.builtin.include_tasks: pkg_install.yml
+
 - name: Include controller installation tasks
   ansible.builtin.include_tasks: slurmctld.yml
   when: slurm_is_controller

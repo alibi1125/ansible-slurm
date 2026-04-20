@@ -1,12 +1,5 @@
 ---
 
-- name: Install Slurm DB packages
-  ansible.builtin.package:
-    name: "{{ __slurm_packages.slurmdbd }}"
-    state: "{{ 'latest' if slurm_upgrade else 'present' }}"
-    disable_gpg_check: "{{ true if slurm_use_local_packages else omit }}"
-  become: true
-
 - name: Create slurmdbd log directory
   ansible.builtin.file:
     path: "{{ __slurmdbd_config_merged.LogFile | dirname }}"

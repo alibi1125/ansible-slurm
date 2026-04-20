@@ -1,0 +1,21 @@
+---
+
+- name: Pull in all packages to be installed
+  ansible.builtin.set_fact:
+    __slurm_pkg_coll: >-
+      {{
+        (
+          __slurm_packages.client
+          + __slurm_packages.slurmctld if slurm_is_controller else []
+          + __slurm_packages.slurmd if slurm_is_exechost else []
+          + __slurm_packages.slurmdbd if slurm_is_dbdserver else []
+          + __slurm_packages.slurmrestd if slurm_is_restserver else []
+        )
+        | unique
+      }}
+
+- name: Install all packages in one go
+  ansible.builtin.package:
+    name: "{{ __slurm_pkg_coll }}"
+    state: "{{ 'latest' if slurm_upgrade else 'present' }}"
+    disable_gpg_check: "{{ true if slurm_use_local_packages else omit }}"
