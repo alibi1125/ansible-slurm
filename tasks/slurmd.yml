@@ -1,30 +1,34 @@
 ---
 
-- name: Create slurm spool directory
-  ansible.builtin.file:
-    path: "{{ __slurm_config_merged.SlurmdSpoolDir }}"
-    owner: root
-    group: root
-    mode: "0755"
-    state: directory
-  when: slurm_create_dirs
-  notify:
-    - Restart slurmd
-  become: true
+- name: Process config elements for exec hosts
+  block:
+    - name: Create slurm spool directory
+      ansible.builtin.file:
+        path: "{{ __slurm_config_merged.SlurmdSpoolDir }}"
+        owner: root
+        group: root
+        mode: "0755"
+        state: directory
+      when: slurm_create_dirs
+      notify:
+        - Restart slurmd
+      become: true
 
-- name: Create slurm log directory
-  ansible.builtin.file:
-    path: "{{ __slurm_config_merged.SlurmdLogFile | dirname }}"
-    owner: "{{ __slurm_user_name }}"
-    group: "{{ __slurm_group_name }}"
-    mode: "0755"
-    state: directory
-  when: "slurm_create_dirs and __slurm_config_merged.SlurmdLogFile is defined and __slurm_config_merged.SlurmdLogFile != omit"
-  become: true
+    - name: Create slurm log directory
+      ansible.builtin.file:
+        path: "{{ __slurm_config_merged.SlurmdLogFile | dirname }}"
+        owner: "{{ __slurm_user_name }}"
+        group: "{{ __slurm_group_name }}"
+        mode: "0755"
+        state: directory
+      when: "slurm_create_dirs and __slurm_config_merged.SlurmdLogFile is defined and __slurm_config_merged.SlurmdLogFile != omit"
+      become: true
 
-- name: Include config dir creation tasks
-  ansible.builtin.include_tasks: _inc_create_config_dir.yml
-  when: slurm_create_dirs
+    - name: Include config dir creation tasks
+      ansible.builtin.include_tasks: _inc_create_config_dir.yml
+      when: slurm_create_dirs
 
-- name: Include extra config creation tasks
-  ansible.builtin.include_tasks: _inc_extra_configs.yml
+    - name: Include extra config creation tasks
+      ansible.builtin.include_tasks: _inc_extra_configs.yml
+  tags:
+    - reconfigure

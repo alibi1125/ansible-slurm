@@ -3,6 +3,8 @@
 - name: Include config dir creation tasks
   ansible.builtin.include_tasks: _inc_create_config_dir.yml
   when: slurm_create_dirs
+  tags:
+    - reconfigure
 
 - name: Install log rotation configuration
   ansible.builtin.template:
@@ -23,6 +25,8 @@
     - Restart slurmd
     - Restart slurmctld
   become: true
+  tags:
+    - reconfigure
 
 - name: Include munge tasks
   ansible.builtin.include_tasks: munge.yml

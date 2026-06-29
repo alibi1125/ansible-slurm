@@ -11,6 +11,8 @@
   notify:
     - Restart slurmctld
   become: true
+  tags:
+    - reconfigure
 
 - name: Create slurm log directory
   ansible.builtin.file:
@@ -21,10 +23,16 @@
     state: directory
   when: "slurm_create_dirs and __slurm_config_merged.SlurmctldLogFile is defined and __slurm_config_merged.SlurmctldLogFile != omit"
   become: true
+  tags:
+    - reconfigure
 
 - name: Include config dir creation tasks
   ansible.builtin.include_tasks: _inc_create_config_dir.yml
   when: slurm_create_dirs
+  tags:
+    - reconfigure
 
 - name: Include extra config creation tasks
   ansible.builtin.include_tasks: _inc_extra_configs.yml
+  tags:
+    - reconfigure

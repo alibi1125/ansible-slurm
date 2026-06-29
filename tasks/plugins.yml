@@ -21,3 +21,5 @@
 - name: Pull in additional main config entries for {{ plugin.name }}
   ansible.builtin.set_fact:
     __slurm_config_merged: "{{ __slurm_config_merged | combine(plugin.slurm_conf_entries | default({})) }}"
+  tags:
+    - reconfigure

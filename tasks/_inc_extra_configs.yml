@@ -23,6 +23,8 @@
     - Restart slurmctld
     - Restart slurmd
   become: true
+  tags:
+    - reconfigure
 
 - name: Install extra plugin configs
   ansible.builtin.template:
@@ -35,3 +37,5 @@
     loop_var: plugin
     label: "{{ plugin.name }}"
   when: "plugin.plugin_conf_name is defined"
+  tags:
+    - reconfigure

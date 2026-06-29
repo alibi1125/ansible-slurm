@@ -1,31 +1,35 @@
 ---
 
-- name: Create slurmdbd log directory
-  ansible.builtin.file:
-    path: "{{ __slurmdbd_config_merged.LogFile | dirname }}"
-    owner: "{{ __slurm_user_name }}"
-    group: "{{ __slurm_group_name }}"
-    mode: "0755"
-    state: directory
-  when: slurm_create_dirs and __slurmdbd_config_merged.LogFile != omit
-  become: true
+- name: Process config elements for dbd hosts
+  block:
+    - name: Create slurmdbd log directory
+      ansible.builtin.file:
+        path: "{{ __slurmdbd_config_merged.LogFile | dirname }}"
+        owner: "{{ __slurm_user_name }}"
+        group: "{{ __slurm_group_name }}"
+        mode: "0755"
+        state: directory
+      when: slurm_create_dirs and __slurmdbd_config_merged.LogFile != omit
+      become: true
 
-- name: Include config dir creation tasks
-  ansible.builtin.include_tasks: _inc_create_config_dir.yml
-  when: slurm_create_dirs
+    - name: Include config dir creation tasks
+      ansible.builtin.include_tasks: _inc_create_config_dir.yml
+      when: slurm_create_dirs
 
-- name: Install slurmdbd.conf
-  ansible.builtin.template:
-    src: generic.conf.j2
-    dest: "{{ slurm_config_dir }}/{{ item.name }}"
-    owner: "{{ __slurm_user_name }}"
-    group: root
-    mode: "0600"
-  with_items:
-    - name: slurmdbd.conf
-      config: __slurmdbd_config_merged
-  loop_control:
-    label: "{{ item.name }}"
-  notify:
-    - Restart slurmdbd
-  become: true
+    - name: Install slurmdbd.conf
+      ansible.builtin.template:
+        src: generic.conf.j2
+        dest: "{{ slurm_config_dir }}/{{ item.name }}"
+        owner: "{{ __slurm_user_name }}"
+        group: root
+        mode: "0600"
+      with_items:
+        - name: slurmdbd.conf
+          config: __slurmdbd_config_merged
+      loop_control:
+        label: "{{ item.name }}"
+      notify:
+        - Restart slurmdbd
+      become: true
+  tags:
+    - reconfigure

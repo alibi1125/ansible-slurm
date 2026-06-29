@@ -18,6 +18,8 @@
   loop_control:
     loop_var: plugin
     label: "{{ plugin.name }}"
+  tags:
+    - reconfigure
 
 - name: Run package installs
   ansible.builtin.include_tasks: pkg_install.yml
@@ -25,14 +27,20 @@
 - name: Include controller installation tasks
   ansible.builtin.include_tasks: slurmctld.yml
   when: slurm_is_controller
+  tags:
+    - reconfigure
 
 - name: Include execution host installation tasks
   ansible.builtin.include_tasks: slurmd.yml
   when: slurm_is_exechost
+  tags:
+    - reconfigure
 
 - name: Include DB installation tasks
   ansible.builtin.include_tasks: slurmdbd.yml
   when: slurm_is_dbdserver
+  tags:
+    - reconfigure
 
 - name: Include REST API installation tasks
   ansible.builtin.include_tasks: slurmrestd.yml
