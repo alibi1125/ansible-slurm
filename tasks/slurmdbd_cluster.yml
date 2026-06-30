@@ -1,17 +1,12 @@
 ---
 
 - name: Check for existence of cluster in db
-  register: cluster_check
   command: "sacctmgr --parsable2 --noheader list cluster format=cluster"
+  register: __slurm_cluster_check
   changed_when: false
   become: true
 
-- name: Set cluster_check_boolean
-  set_fact:
-    __cluster_not_setup: false
-  when: __slurm_cluster_name in cluster_check.stdout_lines
-
 - name: Create cluster {{ __slurm_cluster_name }} in the db
   command: "sacctmgr --immediate add cluster {{ __slurm_cluster_name }}"
-  when: __cluster_not_setup
+  when: __slurm_cluster_name not in __slurm_cluster_check.stdout_lines
   become: true

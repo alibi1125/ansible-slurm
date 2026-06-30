@@ -15,6 +15,14 @@ slurm_packages:
   slurmdbd: []
   slurmrestd: []
 
+slurm_user:
+  name: slurm
+  group: slurm
+
+slurm_rest_user:
+  name: slurmrestd
+  group: slurmrestd
+
 slurm_config_dir: "{{ '/etc/slurm-llnl' if __slurm_llnl else '/etc/slurm' }}"
 
 slurm_create_user: "{{ __slurm_redhat }}"
@@ -31,25 +39,19 @@ slurm_slurmrestd_service_name: slurmrestd
 # Cluster name for slurm config. This is required to correctly setup slurmdbd and attune it to the slurm config.
 # For the role to work as expected, do not set slurm_config.ClusterName manually. Only set slurm_cluster instead.
 __slurm_cluster_name: "{{ slurm_cluster | default('cluster') }}"
-__cluster_not_setup: true # Default value. Is modified if cluster already exists in db
 
 slurm_start_services: true
 # Some actions trigger daemon restarts to apply changed settings. Depending on the specifics, this may be unnecessary
 # and/or undesirable. Set this option true to do reloads instead of restarts where this is an option.
 slurm_no_restarts: false
 
-__slurm_user_name: "{{ (slurm_user | default({})).name | default('slurm') }}"
-# TODO: this could be incorrect, use the group collection from galaxyproject.galaxy
-__slurm_group_name: "{{ (slurm_user | default({})).group | default(omit) }}"
-
-__slurm_rest_user_name: "{{ (slurm_rest_user | default({})).name | default('slurmrest') }}"
-__slurm_rest_group_name: "{{ (slurm_rest_user | default({})).group | default(omit) }}"
-
 # Unix sockets for slurmrestd to listen on can be provided as a list in slurm_rest_listen_sockets. Sockets will be created if necessary.
-__slurm_rest_listen_sockets: "{{ slurm_rest_listen_sockets | default(['/var/lib/slurmrest/slurmrestd.socket']) }}"
+slurm_rest_listen_sockets:
+  - "/var/lib/slurmrest/slurmrestd.socket"
 # hosts and ports for slurmrestd to listen on can be provided as a list in slurm_rest_listen_hosts.
-__slurm_rest_listen_hosts: "{{ slurm_rest_listen_hosts | default(['0.0.0.0:6820']) }}"
-__slurm_rest_listen_on: "{{ ( __slurm_rest_listen_sockets | map('regex_replace', '^(.*)$', 'unix:\\1') + __slurm_rest_listen_hosts ) | join(',') }}"
+slurm_rest_listen_hosts:
+  - "0.0.0.0:6820"
+__slurm_rest_listen_on: "{{ ( slurm_rest_listen_sockets | map('regex_replace', '^(.*)$', 'unix:\\1') + slurm_rest_listen_hosts ) | join(',') }}"
 
 __slurm_run_dir: >-
   {{
@@ -69,7 +71,7 @@ __slurm_redhat: "{{ ansible_facts['os_family'] == 'RedHat' }}"
 __slurm_config_default:
   AuthType: auth/munge
   CryptoType: crypto/munge
-  SlurmUser: "{{ __slurm_user_name }}"
+  SlurmUser: "{{ slurm_user.name }}"
   ClusterName: "{{ __slurm_cluster_name }}"
   # default is proctrack/cgroup which is the best but also less than 100% chance of working e.g. in docker
   ProctrackType: proctrack/pgid
@@ -100,7 +102,7 @@ __slurm_config_merged: "{{ __slurm_config_default | combine(slurm_config | defau
 __slurmdbd_config_default:
   AuthType: auth/munge
   DbdPort: 6819
-  SlurmUser: "{{ __slurm_user_name }}"
+  SlurmUser: "{{ slurm_user.name }}"
   SlurmctldPidFile: "{{ __slurm_run_dir ~ '/slurmdbd.pid' if __slurm_debian else omit }}"
   LogFile: "{{ __slurm_log_dir ~ '/slurmdbd.log' if __slurm_debian else omit }}"
 __slurmdbd_config_user: "{{ slurm_dbd_config if slurm_dbd_config is mapping else (slurmdbd_config | default({})) }}"
@@ -122,9 +124,9 @@ __slurm_redhat_packages:
 
 __slurm_rest_redhat_systemd_modifiers:
   - regex: 'User='
-    replace: 'User={{ __slurm_rest_user_name }}'
+    replace: 'User={{ slurm_rest_user.name }}'
   - regex: 'Group='
-    replace: 'Group={{ __slurm_rest_group_name | default(__slurm_rest_user_name) }}'
+    replace: 'Group={{ slurm_rest_user.group }}'
   - regex: 'Environment=SLURMRESTD_LISTEN='
     replace: 'Environment=SLURMRESTD_LISTEN={{ __slurm_rest_listen_on }}'
 

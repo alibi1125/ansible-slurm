@@ -17,8 +17,8 @@
     - name: Create slurm log directory
       ansible.builtin.file:
         path: "{{ __slurm_config_merged.SlurmdLogFile | dirname }}"
-        owner: "{{ __slurm_user_name }}"
-        group: "{{ __slurm_group_name }}"
+        owner: "{{ slurm_user.name }}"
+        group: "{{ slurm_user.group }}"
         mode: "0755"
         state: directory
       when: "slurm_create_dirs and __slurm_config_merged.SlurmdLogFile is defined and __slurm_config_merged.SlurmdLogFile != omit"

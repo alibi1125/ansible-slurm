@@ -1,21 +1,38 @@
 ---
 
+- name: Validate some basic assertions on user configurations
+  ansible.builtin.assert:
+    that:
+      - _userconf is defined
+      - _userconf is mapping
+      - _userconf.name is defined
+      - _userconf.name is string
+      - _userconf.name != ''
+      - _userconf.group is defined
+      - _userconf.group is string
+      - _userconf.group != ''
+    fail_msg: "User configuration must be a mapping containing at least nonempty `name` and `group` keys with string values."
+
+- name: Show user spec
+  ansible.builtin.debug:
+    var: _userconf
+    verbosity: 1
+
 - name: Create slurm group
   ansible.builtin.group:
-    name: "{{ (_userconf | default({})).group }}"
-    gid: "{{ (_userconf | default({})).gid | default(omit) }}"
-    system: "{{ (_userconf | default({})).system | default('yes') }}"
-  when: (_userconf | default({})).group is defined
+    name: "{{ _userconf.group }}"
+    gid: "{{ _userconf.gid | default(omit) }}"
+    system: "{{ _userconf.system | default('yes') }}"
   become: true
 
 - name: Create slurm user
   ansible.builtin.user:
-    name: "{{ (_userconf | default({})).name | default('slurm') }}"
-    comment: "{{ (_userconf | default({})).comment | default(omit) }}"
-    uid: "{{ (_userconf | default({})).uid | default(omit) }}"
-    group: "{{ (_userconf | default({})).group | default(omit) }}"
-    groups: "{{ (_userconf | default({})).groups | default(omit) }}"
-    home: "{{ (_userconf | default({})).home | default(omit) }}"
-    shell: "{{ (_userconf | default({})).shell | default(omit) }}"
-    system: "{{ (_userconf | default({})).system | default('yes') }}"
+    name: "{{ _userconf.name }}"
+    comment: "{{ _userconf.comment | default(omit) }}"
+    uid: "{{ _userconf.uid | default(omit) }}"
+    group: "{{ _userconf.group }}"
+    groups: "{{ _userconf.groups | default(omit) }}"
+    home: "{{ _userconf.home | default(omit) }}"
+    shell: "{{ _userconf.shell | default(omit) }}"
+    system: "{{ _userconf.system | default('yes') }}"
   become: true

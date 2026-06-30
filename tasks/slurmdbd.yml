@@ -5,8 +5,8 @@
     - name: Create slurmdbd log directory
       ansible.builtin.file:
         path: "{{ __slurmdbd_config_merged.LogFile | dirname }}"
-        owner: "{{ __slurm_user_name }}"
-        group: "{{ __slurm_group_name }}"
+        owner: "{{ slurm_user.name }}"
+        group: "{{ slurm_user.name }}"
         mode: "0755"
         state: directory
       when: slurm_create_dirs and __slurmdbd_config_merged.LogFile != omit
@@ -20,7 +20,7 @@
       ansible.builtin.template:
         src: generic.conf.j2
         dest: "{{ slurm_config_dir }}/{{ item.name }}"
-        owner: "{{ __slurm_user_name }}"
+        owner: "{{ slurm_user.name }}"
         group: root
         mode: "0600"
       with_items:

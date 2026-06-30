@@ -1,38 +1,34 @@
 ---
 
-- name: Create slurm state directory
-  ansible.builtin.file:
-    path: "{{ __slurm_config_merged.StateSaveLocation }}"
-    owner: "{{ __slurm_user_name }}"
-    group: "{{ __slurm_group_name }}"
-    mode: "0700"
-    state: directory
-  when: slurm_create_dirs
-  notify:
-    - Restart slurmctld
-  become: true
-  tags:
-    - reconfigure
+- node: Process config elements for controller hosts
+  block:
+    - name: Create slurm state directory
+      ansible.builtin.file:
+        path: "{{ __slurm_config_merged.StateSaveLocation }}"
+        owner: "{{ slurm_user.name }}"
+        group: "{{ slurm_user.group }}"
+        mode: "0700"
+        state: directory
+      when: slurm_create_dirs
+      notify:
+        - Restart slurmctld
+      become: true
 
-- name: Create slurm log directory
-  ansible.builtin.file:
-    path: "{{ __slurm_config_merged.SlurmctldLogFile | dirname }}"
-    owner: "{{ __slurm_user_name }}"
-    group: "{{ __slurm_group_name }}"
-    mode: "0755"
-    state: directory
-  when: "slurm_create_dirs and __slurm_config_merged.SlurmctldLogFile is defined and __slurm_config_merged.SlurmctldLogFile != omit"
-  become: true
-  tags:
-    - reconfigure
+    - name: Create slurm log directory
+      ansible.builtin.file:
+        path: "{{ __slurm_config_merged.SlurmctldLogFile | dirname }}"
+        owner: "{{ slurm_user.name }}"
+        group: "{{ slurm_user.group }}"
+        mode: "0755"
+        state: directory
+      when: "slurm_create_dirs and __slurm_config_merged.SlurmctldLogFile is defined and __slurm_config_merged.SlurmctldLogFile != omit"
+      become: true
 
-- name: Include config dir creation tasks
-  ansible.builtin.include_tasks: _inc_create_config_dir.yml
-  when: slurm_create_dirs
-  tags:
-    - reconfigure
+    - name: Include config dir creation tasks
+      ansible.builtin.include_tasks: _inc_create_config_dir.yml
+      when: slurm_create_dirs
 
-- name: Include extra config creation tasks
-  ansible.builtin.include_tasks: _inc_extra_configs.yml
+    - name: Include extra config creation tasks
+      ansible.builtin.include_tasks: _inc_extra_configs.yml
   tags:
     - reconfigure

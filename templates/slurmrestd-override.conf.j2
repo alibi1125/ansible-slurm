@@ -1,0 +1,7 @@
+[Service]
+User={{ slurm_rest_user.name }}
+Group={{ slurm_rest_user.group }}
+Environment=SLURMRESTD_LISTEN={{ __slurm_rest_listen_on }}
+# We use the start command from newer versions as it simplifies later upgrades.
+ExecStart=
+ExecStart=/usr/sbin/slurmrestd $SLURMRESTD_OPTIONS

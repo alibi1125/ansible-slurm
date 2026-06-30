@@ -1,17 +1,23 @@
 ---
 
-# TODO: Verify if this would work on Debian/Ubuntu as well
-- name: Set up systemd service file
-  ansible.builtin.lineinfile:
-    path: /usr/lib/systemd/system/slurmrestd.service
-    regexp: "{{ item.regex }}"
-    line: "{{ item.replace }}"
-    insertbefore: "[Install]"
+# TODO: Verify this would work on Debian/Ubuntu as well
+- name: Ensure the place to put our overrides exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/slurmrestd.service.d
+    state: directory
+    mode: "0755"
+  become: true
+  when: __slurm_redhat
+
+- name: Set up systemd override
+  ansible.builtin.template:
+    src: slurmrestd-override.conf.j2
+    dest: /etc/systemd/system/slurmrestd.service.d/override.conf
+    mode: "0644"
+  become: true
+  when: __slurm_redhat
   notify:
     - Restart slurmrestd
-  become: true
-  loop: "{{ __slurm_rest_redhat_systemd_modifiers }}"
-  when: __slurm_redhat
 
 - name: Perform a daemon reload just to be safe
   ansible.builtin.systemd_service:
@@ -23,8 +29,8 @@
   ansible.builtin.file:
     path: /var/spool/slurm/statesave
     state: directory
-    owner: "{{ __slurm_user_name }}"
-    group: "{{ __slurm_group_name }}"
+    owner: "{{ slurm_user.name }}"
+    group: "{{ slurm_user.group }}"
     mode: "0755"
   become: true
 
@@ -32,8 +38,8 @@
   ansible.builtin.file:
     path: "{{ item | dirname }}"
     state: directory
-    owner: "{{ __slurm_rest_user_name }}"
-    group: "{{ __slurm_rest_group_name }}"
+    owner: "{{ slurm_rest_user.name }}"
+    group: "{{ slurm_rest_user.group }}"
     mode: "0755"
   become: true
   loop: "{{ __slurm_rest_listen_sockets }}"
@@ -49,7 +55,7 @@
 - name: Set reasonable permissions for the key
   ansible.builtin.file:
     path: "/var/spool/slurm/statesave/jwt_hs256.key"
-    owner: "{{ __slurm_user_name }}"
-    group: "{{ __slurm_group_name }}"
+    owner: "{{ slurm_user.name }}"
+    group: "{{ slurm_user.group }}"
     mode: "0400"
   become: true
