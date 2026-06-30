@@ -1,6 +1,6 @@
 ---
 
-- node: Process config elements for controller hosts
+- name: Process config elements for controller hosts
   block:
     - name: Create slurm state directory
       ansible.builtin.file:

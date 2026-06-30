@@ -1,29 +1,31 @@
 ---
 
 # TODO: Verify this would work on Debian/Ubuntu as well
-- name: Ensure the place to put our overrides exists
-  ansible.builtin.file:
-    path: /etc/systemd/system/slurmrestd.service.d
-    state: directory
-    mode: "0755"
-  become: true
+- name: Set up slurmrestd service on RedHat
   when: __slurm_redhat
+  block:
+    - name: Ensure the place to put systemd overrides exists
+      ansible.builtin.file:
+        path: /etc/systemd/system/slurmrestd.service.d
+        state: directory
+        mode: "0755"
+      become: true
 
-- name: Set up systemd override
-  ansible.builtin.template:
-    src: slurmrestd-override.conf.j2
-    dest: /etc/systemd/system/slurmrestd.service.d/override.conf
-    mode: "0644"
-  become: true
-  when: __slurm_redhat
-  notify:
-    - Restart slurmrestd
+    - name: Set up systemd override
+      ansible.builtin.template:
+        src: slurmrestd-override.conf.j2
+        dest: /etc/systemd/system/slurmrestd.service.d/override.conf
+        mode: "0644"
+      become: true
+      register: __slurm_rest_override
+      notify:
+        - Restart slurmrestd
 
-- name: Perform a daemon reload just to be safe
-  ansible.builtin.systemd_service:
-    daemon_reload: true
-  become: true
-  when: __slurm_redhat
+    - name: Perform a daemon reload
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+      when: __slurm_rest_override.changed
+      become: true
 
 - name: Create statesave directory
   ansible.builtin.file:
@@ -42,7 +44,7 @@
     group: "{{ slurm_rest_user.group }}"
     mode: "0755"
   become: true
-  loop: "{{ __slurm_rest_listen_sockets }}"
+  loop: "{{ slurm_rest_listen_sockets }}"
 
 - name: Create cryptographic key for JWT
   ansible.builtin.command:

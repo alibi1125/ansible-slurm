@@ -19,3 +19,4 @@
     name: "{{ __slurm_pkg_coll }}"
     state: "{{ 'latest' if slurm_upgrade else 'present' }}"
     disable_gpg_check: "{{ true if slurm_use_local_packages else omit }}"
+  become: true

@@ -49,12 +49,16 @@
 - name: Import common tasks
   ansible.builtin.import_tasks: common.yml
 
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+
 - name: Ensure slurmdbd is enabled and running
   ansible.builtin.service:
     name: "{{ slurm_slurmdbd_service_name }}"
     enabled: true
     state: started
   when: "slurm_start_services and slurm_is_dbdserver"
+  become: true
 
 - name: Ensure slurmctld is enabled and running
   ansible.builtin.service:
@@ -62,6 +66,7 @@
     enabled: true
     state: started
   when: "slurm_start_services and slurm_is_controller"
+  become: true
 
 - name: Ensure slurmd is enabled and running
   ansible.builtin.service:
@@ -69,6 +74,7 @@
     enabled: true
     state: started
   when: "slurm_start_services and slurm_is_exechost"
+  become: true
 
 - name: Ensure slurmrestd is enabled and running
   ansible.builtin.service:
@@ -76,6 +82,7 @@
     enabled: true
     state: started
   when: "slurm_start_services and slurm_is_restserver"
+  become: true
 
 - name: Setup cluster on slurmdb
   include_tasks: slurmdbd_cluster.yml
