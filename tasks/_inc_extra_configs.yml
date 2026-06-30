@@ -19,12 +19,12 @@
   loop_control:
     label: "{{ item.name }}"
   when: lookup('vars', item.config) is defined
-  notify:
-    - Restart slurmctld
-    - Restart slurmd
   become: true
   tags:
     - reconfigure
+  notify:
+    - Restart slurmctld
+    - Restart slurmd
 
 - name: Install extra plugin configs
   ansible.builtin.template:
@@ -37,5 +37,6 @@
     loop_var: plugin
     label: "{{ plugin.name }}"
   when: "plugin.plugin_conf_name is defined"
+  become: true
   tags:
     - reconfigure
